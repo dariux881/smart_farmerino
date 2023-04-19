@@ -1,8 +1,9 @@
 #define REQUEST_SEPARATOR '!'
 #define PARAM_SEPARATOR '#'
 
-String _command;
-String _commandPrefix;
+char* _command;
+char* _requestId;
+char* _parameters;
 int _commandResult;
 
 void setup() {
@@ -34,10 +35,31 @@ void GetCommand() {
   String teststr = Serial.readString();
   teststr.trim(); // remove any \r \n whitespace at the end of the String
 
-  _command = teststr;
+  // getting request ID
+  int reqIdSeparatorIndex = teststr.indexOf(REQUEST_SEPARATOR);
+  _requestId = new char[reqIdSeparatorIndex];
+  teststr
+    .toCharArray(_requestId, reqIdSeparatorIndex, 0);
 
-  int lastIndex = teststr.indexOf(REQUEST_SEPARATOR);
-  _commandPrefix = teststr.substring(0, lastIndex);
+  // getting command ID
+  int commandSeparatorIndex = teststr.lastIndexOf(REQUEST_SEPARATOR);
+  unsigned short commandLength = commandSeparatorIndex - reqIdSeparatorIndex + 1;
+  _command = new char[commandLength];
+  teststr
+    .toCharArray(_command, commandLength, reqIdSeparatorIndex);
+
+  // getting parameters
+  unsigned short parametersLength = teststr.length() - commandSeparatorIndex + 1;
+  if (parametersLength > 0)
+  {
+    _parameters = new char[parametersLength];
+    teststr
+      .toCharArray(_parameters, parametersLength, commandSeparatorIndex);    
+  }
+  else
+  {
+    _parameters = NULL;
+  }
 }
 
 short ValidCommand() {
@@ -56,13 +78,19 @@ void ExecuteCommand() {
 
 void ReturnWithError() {
   CleanSerial();
-  Serial.println(_commandPrefix + REQUEST_SEPARATOR + "-1");
+  
+  Serial.print(_requestId + REQUEST_SEPARATOR);
+  Serial.println("-1");
+
   ResetCommand();
 }
 
 void ReturnCommandResult() {
   CleanSerial();
-  Serial.println(_commandPrefix + REQUEST_SEPARATOR + _commandResult);
+
+  Serial.print(_requestId + REQUEST_SEPARATOR);
+  Serial.println(_commandResult);
+
   ResetCommand();
 }
 
@@ -71,6 +99,7 @@ void CleanSerial() {
 }
 
 void ResetCommand() {
-  _command = "";
-  _commandPrefix = "";
+  _requestId = NULL;
+  _command = NULL;
+  _parameters = NULL;
 }
