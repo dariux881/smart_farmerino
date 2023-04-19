@@ -37,24 +37,24 @@ void GetCommand() {
 
   // getting request ID
   int reqIdSeparatorIndex = teststr.indexOf(REQUEST_SEPARATOR);
-  _requestId = new char[reqIdSeparatorIndex];
+  _requestId = new char[reqIdSeparatorIndex + 1];
   teststr
-    .toCharArray(_requestId, reqIdSeparatorIndex, 0);
+    .toCharArray(_requestId, reqIdSeparatorIndex + 1);
 
   // getting command ID
   int commandSeparatorIndex = teststr.lastIndexOf(REQUEST_SEPARATOR);
-  unsigned short commandLength = commandSeparatorIndex - reqIdSeparatorIndex + 1;
-  _command = new char[commandLength];
+  unsigned short commandLength = commandSeparatorIndex - reqIdSeparatorIndex;
+  _command = new char[commandLength + 1];
   teststr
-    .toCharArray(_command, commandLength, reqIdSeparatorIndex);
+    .toCharArray(_command, commandLength, reqIdSeparatorIndex+1);
 
   // getting parameters
-  unsigned short parametersLength = teststr.length() - commandSeparatorIndex + 1;
+  unsigned short parametersLength = teststr.length() - commandSeparatorIndex;
   if (parametersLength > 0)
   {
     _parameters = new char[parametersLength];
     teststr
-      .toCharArray(_parameters, parametersLength, commandSeparatorIndex);    
+      .toCharArray(_parameters, parametersLength, commandSeparatorIndex+1);    
   }
   else
   {
@@ -63,12 +63,21 @@ void GetCommand() {
 }
 
 short ValidCommand() {
-  //TODO check command
-  return 1;
+  // checking command essential values
+  // Serial.print("request: ");
+  // Serial.println(_requestId);
+
+  // Serial.print("command: ");
+  // Serial.println(_command);
+
+  // Serial.print("params: ");
+  // Serial.println(_parameters);
+
+  return _requestId != NULL && _command != NULL;
 }
 
 void ExecuteCommand() {
-  //TODO exec _command
+  //TODO check command requirements and exec _command
 
   delay(random(1, 10)*1000);
   
@@ -79,7 +88,8 @@ void ExecuteCommand() {
 void ReturnWithError() {
   CleanSerial();
   
-  Serial.print(_requestId + REQUEST_SEPARATOR);
+  Serial.print(_requestId);
+  Serial.print(REQUEST_SEPARATOR);
   Serial.println("-1");
 
   ResetCommand();
@@ -88,7 +98,8 @@ void ReturnWithError() {
 void ReturnCommandResult() {
   CleanSerial();
 
-  Serial.print(_requestId + REQUEST_SEPARATOR);
+  Serial.print(_requestId);
+  Serial.print(REQUEST_SEPARATOR);
   Serial.println(_commandResult);
 
   ResetCommand();
