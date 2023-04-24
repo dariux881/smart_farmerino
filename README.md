@@ -2,6 +2,8 @@
 Smart Farmer - Arduino side
 
 # Supported commands
+- *END* Prefix when notifying a command final result
+- *UPD* Prefix when notifying a command ongoing result
 - *STP* Stops all current execution. Resets current operation as well
 - *SLP* Sleeps of the given amount of time
 - *MXY* Moves to position XY
@@ -14,3 +16,8 @@ Smart Farmer - Arduino side
 # Errors
 The following errors can be raised:
 - INVALID_PARAMETERS -1
+- INVALID_PARAMETERS -2
+- INVALID_COMMAND -3
+
+
+
