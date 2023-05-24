@@ -1,6 +1,6 @@
-#include <ArduinoBLE.h>
+//#include <ArduinoBLE.h>
 
-#define DEBUG
+//#define DEBUG
 
 #define REQUEST_SEPARATOR "!"
 #define PARAM_SEPARATOR "#"
@@ -14,13 +14,24 @@
 #include "CommandManager.h"
 #include "MovementManager.h"
 
+#ifdef DEBUG
+#include "MockMovementManager.h"
+#else
+#include "MotorMovementManager.h"
+#endif
+
 CommandManager* _commandManager;
 MovementManager* _movementManager;
 
 void setup() {
   Serial.begin(9600);
 
-  _movementManager = new MovementManager(ReturnCommandPartialResult);
+#ifdef DEBUG
+  _movementManager = new MockMovementManager(ReturnCommandPartialResult);
+#else
+  _movementManager = new MotorMovementManager(ReturnCommandPartialResult);
+#endif
+
   _commandManager = new CommandManager(_movementManager);
 }
 
