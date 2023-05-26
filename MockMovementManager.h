@@ -10,6 +10,7 @@ class MockMovementManager : public MovementManager
         {
             _partialResult = partialResult;
             InitializePosition();
+            Serial.println("Mock Mov Manager initialized");
         }
 
         /// @brief Stops all the motors
@@ -21,8 +22,9 @@ class MockMovementManager : public MovementManager
         /// @param x x-axis coordinate
         /// @param y y-axis coordinate
         int MoveToXY(float x, float y) {
-            char buffer[80];
-            sprintf(buffer, "x: %f -> %f\ny: %f -> %f", _x, x, _y, y);
+            char buffer[160];
+
+            sprintf(buffer, "x: %s -> %s\ny: %s -> %s", PrintableFloat(_x), PrintableFloat(x), PrintableFloat(_y), PrintableFloat(y));
             Serial.println(buffer);
 
             short xStepFactor = (x > _x) ? 1 : -1;
@@ -44,7 +46,7 @@ class MockMovementManager : public MovementManager
 
                 _x += xStepFactor*xStepValue;
 
-                sprintf(partialPos, "%f%s%f", _x, PARAM_SEPARATOR, _y);
+                sprintf(partialPos, "%s%s%s", PrintableFloat(_x), PARAM_SEPARATOR, PrintableFloat(_y));
                 if (_partialResult) _partialResult(partialPos);
             }
 
@@ -58,7 +60,7 @@ class MockMovementManager : public MovementManager
 
                 _y += yStepFactor*yStepValue;
 
-                sprintf(partialPos, "%f%s%f", _x, PARAM_SEPARATOR, _y);
+                sprintf(partialPos, "%s%s%s", PrintableFloat(_x), PARAM_SEPARATOR, PrintableFloat(_y));
                 if (_partialResult) _partialResult(partialPos);
             }
 
@@ -69,7 +71,7 @@ class MockMovementManager : public MovementManager
         /// @param z The desired height
         int MoveToHeight(float z) {
             char buffer[40];
-            sprintf(buffer, "z: %f->%f", _z, z);
+            sprintf(buffer, "z: %s -> %s", PrintableFloat(_z), PrintableFloat(z));
             Serial.println(buffer);
 
             short zStepFactor = (z > _z) ? 1 : -1;
@@ -89,7 +91,7 @@ class MockMovementManager : public MovementManager
 
                 _z += zStepFactor * zStepValue;
 
-                sprintf(partialPos, "%f", _z);
+                sprintf(partialPos, "%s", PrintableFloat(_z));
                 if (_partialResult) _partialResult(partialPos);
             }
 
@@ -112,7 +114,7 @@ class MockMovementManager : public MovementManager
         /// @param alpha The desired angle
         int TurnHorizontalPlane(float alpha) {
             char buffer[40];
-            sprintf(buffer, "going to horizontal angle %f", alpha);
+            sprintf(buffer, "going to horizontal angle %s", PrintableFloat(alpha));
             Serial.println(buffer);
 
             delay(1000);
@@ -125,7 +127,7 @@ class MockMovementManager : public MovementManager
         /// @param angle The desired angle
         int TurnVerticalPlane(float beta) {
             char buffer[40];
-            sprintf(buffer, "going to vertical angle %f", beta);
+            sprintf(buffer, "going to vertical angle %s", PrintableFloat(beta));
             Serial.println(buffer);
 
             delay(1000);
@@ -139,7 +141,14 @@ class MockMovementManager : public MovementManager
         float _x, _y, _z, _alpha, _beta;
 
         void InitializePosition() {
-            _x = _y = _z = _alpha = _beta = 0;
+            _x = _y = _z = _alpha = _beta = 0.0f;
+        }
+
+        char* PrintableFloat(float f) {
+            char* fStr = new char[8];
+            dtostrf(f, 6, 2, fStr);
+
+            return fStr;
         }
 };
 
