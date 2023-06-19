@@ -1,6 +1,7 @@
 //#include <ArduinoBLE.h>
+#include <Arduino.h>
 
-//#define DEBUG
+// #define DEBUG
 
 #define REQUEST_SEPARATOR "!"
 #define PARAM_SEPARATOR "#"
@@ -14,11 +15,9 @@
 #include "CommandManager.h"
 #include "MovementManager.h"
 
-#ifdef DEBUG
 #include "MockMovementManager.h"
-#else
 #include "MotorMovementManager.h"
-#endif
+#include "A4988MovementManager.h"
 
 CommandManager* _commandManager;
 MovementManager* _movementManager;
@@ -26,13 +25,20 @@ MovementManager* _movementManager;
 void setup() {
   Serial.begin(9600);
 
-#ifdef DEBUG
-  _movementManager = new MockMovementManager(ReturnCommandPartialResult);
-#else
-  _movementManager = new MotorMovementManager(ReturnCommandPartialResult);
-#endif
+  // _movementManager = new MockMovementManager(ReturnCommandPartialResult);
+  _movementManager = new A4988MovementManager(ReturnCommandPartialResult);
+  // _movementManager = new MotorMovementManager(ReturnCommandPartialResult);
 
   _commandManager = new CommandManager(_movementManager);
+
+  int i=0;
+  while (i<10) {
+    _movementManager->MoveToXY(50, 0);
+    delay(1000);
+    _movementManager->MoveToXY(-50, 0);
+    delay(1000);
+    i++;  
+  }
 }
 
 void loop() {

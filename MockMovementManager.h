@@ -138,7 +138,6 @@ class MockMovementManager : public MovementManager
 
     private:
         void (*_partialResult) (char* value);
-        float _x, _y, _z, _alpha, _beta;
 
         void InitializePosition() {
             _x = _y = _z = _alpha = _beta = 0.0f;

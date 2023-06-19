@@ -27,6 +27,10 @@ class MovementManager
         /// @brief Turns the device on the vertical plane
         /// @param angle The desired angle
         virtual int TurnVerticalPlane(float beta) = 0;
+
+    protected:
+        float _x, _y, _z, _alpha, _beta;
+        bool _currentMovementError;
 };
 
 #endif

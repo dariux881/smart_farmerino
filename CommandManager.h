@@ -94,6 +94,15 @@ class CommandManager
             float x = atof(xstr);
             float y = atof(ystr);
 
+            #ifdef DEBUG
+        
+            Serial.print("x:");
+            Serial.print(x);
+            Serial.print("\ty:");
+            Serial.println(y);
+        
+            #endif
+
             _commandResult = _movementManager->MoveToXY(x, y);
             return;
         }
