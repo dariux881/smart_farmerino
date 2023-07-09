@@ -32,21 +32,30 @@ void setup() {
 
   int i=0;
   int result = 0;
-
-  int targetX = 400;
-  int targetY = 100;
-  
-  while (i<10) {
-    result = _movementManager->MoveToXY(targetX, targetY);
-    Serial.println(result);
-    delay(1000);
-    
-    result = _movementManager->MoveToXY(0, 0);
-    Serial.println(result);
-    delay(1000);
-    
-    i++;  
-  }
+//
+//  int targetX = 400;
+//  int targetY = 100;
+//  
+//  while (i<10) {
+//    result = _movementManager->MoveToXY(targetX, targetY);
+//    Serial.println(result);
+//    delay(1000);
+//    
+//    result = _movementManager->MoveToXY(0, 0);
+//    Serial.println(result);
+//    delay(1000);
+//    
+//    i++;  
+//  }
+  _movementManager->TurnVerticalPlane(0);
+  delay(1000);
+  _movementManager->TurnVerticalPlane(10);
+  delay(1000);
+  _movementManager->TurnVerticalPlane(20);
+  delay(1000);
+  _movementManager->TurnVerticalPlane(150);
+  delay(1000);
+  _movementManager->TurnVerticalPlane(0);
 }
 
 void loop() {

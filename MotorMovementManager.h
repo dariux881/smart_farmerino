@@ -3,6 +3,7 @@
 
 #include "MovementManager.h"
 #include "A4988.h"
+#include <Servo.h>
 
 /*
  * Definition and motors' configuration
@@ -23,6 +24,15 @@
 #define Z_MOTOR_SPEED 70 // RPM
 #define Z_DIR_PIN 0
 #define Z_STEP_PIN 1
+#define Z_EN_PIN 2
+
+#define PAN_STEPS_IN_REVOLUTION 200
+#define PAN_MOTOR_SPEED 70 // RPM
+#define PAN_DIR_PIN 13
+#define PAN_STEP_PIN 11
+#define PAN_EN_PIN 12
+
+#define TILT_PIN A0 
 
 /*
  * Definition how many steps are in a centimeter (unit). Depends on the motor + gears configuration
@@ -30,6 +40,7 @@
 #define X_STEPS_PER_CM 1 // x-axis
 #define Y_STEPS_PER_CM 1 // y-axis
 #define Z_STEPS_PER_CM 1 // z-axis 
+#define PAN_STEPS_PER_CM 1 // z-axis 
 
 class MotorMovementManager : public MovementManager
 {
@@ -124,20 +135,36 @@ class MotorMovementManager : public MovementManager
             return (int)_z;
         }
 
-        /// @brief Turns the device on the horizontal plane
+        /// @brief Turns the device on the horizontal plane (Pan)
         /// @param alpha The desired angle
         int TurnHorizontalPlane(float alpha) {
-            delay(1000);
+            if (alpha == _alpha || !_panMotor) return MOTOR_ERROR;
+          
+            short alphaStepFactor = (alpha > _alpha) ? 1 : -1;
+
+            _currentMovementError = false;
+            _panMotor->enable();
+            _panMotor->move(alphaStepFactor * abs(_alpha - alpha) * PAN_STEPS_PER_CM);
+            _panMotor->disable();
+
+            if (_currentMovementError) {
+              return ERROR_GENERIC;
+            }
+
             _alpha = alpha;
 
             return NO_ERROR;
         }
 
-        /// @brief Turns the device on the vertical plane
+        /// @brief Turns the device on the vertical plane (Tilt)
         /// @param angle The desired angle
         int TurnVerticalPlane(float beta) {
-            delay(1000);
-            _beta = beta;
+            // Pan
+            int angle = (int)min(180, max(0, beta));
+
+            _tiltMotor->write(angle);
+            _beta = angle;
+            delay(15);
 
             return NO_ERROR;
         }
@@ -147,6 +174,8 @@ class MotorMovementManager : public MovementManager
         A4988* _xMotor;
         A4988* _yMotor;
         A4988* _zMotor;
+        A4988* _panMotor;
+        Servo* _tiltMotor;
 
         void InitializeMotors()
         {
@@ -158,14 +187,22 @@ class MotorMovementManager : public MovementManager
             _yMotor->setEnableActiveState(LOW);
             _yMotor->begin(Y_MOTOR_SPEED, 1);
 
-            _zMotor = new A4988(Z_STEPS_IN_REVOLUTION, Z_DIR_PIN, Z_STEP_PIN);
-            //_zMotor->setEnableActiveState(LOW);
+            _zMotor = new A4988(Z_STEPS_IN_REVOLUTION, Z_DIR_PIN, Z_STEP_PIN, Z_EN_PIN);
+            _zMotor->setEnableActiveState(LOW);
             _zMotor->begin(Z_MOTOR_SPEED, 1);
+
+            _panMotor = new A4988(PAN_STEPS_IN_REVOLUTION, PAN_DIR_PIN, PAN_STEP_PIN, PAN_EN_PIN);
+            _panMotor->setEnableActiveState(LOW);
+            _panMotor->begin(PAN_MOTOR_SPEED, 1);
+
+            _tiltMotor = new Servo();
+            _tiltMotor->attach(TILT_PIN);
         }
 
         void InitializePosition() {
-            //TODO init position to all 0
             _x = _y = _z = _alpha = _beta = 0;
+
+            _tiltMotor->write(0);
         }
 
         void ResetSpeed() {
